@@ -5,6 +5,7 @@
  */
 package udemy.pemrogramanjavapzn.todolist;
 
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
  public class App {
@@ -12,7 +13,7 @@ import java.util.Scanner;
     private static Scanner scanner = new Scanner(System.in);
     private static String[] todos = new String[2];
     public static void main(String... args) {
-        testRemoveTodoList();
+        testViewTodoList();
     }
 
     // Controller (bussines logic)
@@ -30,6 +31,10 @@ import java.util.Scanner;
             System.out.println("You haven't created a to-do list yet.");
         } else {
             for(int i = 0; i < todos.length; i++) {
+                if(todos[i] == null) {
+                    continue; // skip jika terdapat nilai null dalam array
+                }
+                
                 System.out.printf("%d. %s%n", (i + 1), todos[i]);
             }
         }
@@ -57,7 +62,7 @@ import java.util.Scanner;
         if(index >= 0) {
             todos[index] = todo;    
         } else {
-            resize();
+            resize(); // tambah ukuran array jika kondisi diatas false
             index = indexAvailable();
             todos[index] = todo;    
         }
@@ -101,7 +106,6 @@ import java.util.Scanner;
         System.arraycopy(temp, index + 1, todos, index, temp.length - index - 1); // copy sisa element
 
         return true;
-
     }
 
     private static void testRemoveTodoList() {
@@ -126,16 +130,40 @@ import java.util.Scanner;
      *    angka.
      */
     public static void viewTodoList() {
-        delimiter('=', 22);
-        System.out.println("~ My TodoList ~");
-        delimiter('=', 22);
-        showTodoList();
-        delimiter('=', 22);
-        System.out.println("Menu :");
-        System.out.println("1. Add to-do list.");
-        System.out.println("2. Remove to-do list.");
-        System.out.println("3. Exit.");
-        System.out.print("Select menu (eq. 1,2,3): ");
+        int menu = 0;
+        while(menu != 3) {
+            try {
+                delimiter('=', 22);
+                System.out.println("~ My TodoList ~");
+                delimiter('=', 22);
+                showTodoList();
+                delimiter('=', 22);
+                System.out.println("Menu :");
+                System.out.println("1. Add to-do list.");
+                System.out.println("2. Remove to-do list.");
+                System.out.println("3. Exit.");
+                System.out.print("Select menu (eq. 1,2,3): ");
+                menu = scanner.nextInt();
+                scanner.nextLine();
+
+                switch(menu) {
+                    case 1:
+                        viewAddTodoList();
+                        break;
+                    case 2:
+                        viewRemoveTodoList();
+                        break;
+                    default :
+                        System.out.println("See you next time!");
+                        System.out.println("Bye... Bye.. Bye..");
+                        exit();
+                        break;    
+                }
+            } catch (InputMismatchException ie) {
+                System.out.println("Please insert a correct number!");
+                scanner.nextLine();
+            }            
+        }
     }
 
     // test 
@@ -144,15 +172,28 @@ import java.util.Scanner;
     }
 
     public static void viewAddTodoList() {
+        delimiter('*', 22);
+        System.out.println("~ Menu Add Todo ~");
+        delimiter('*', 22);
+        System.out.print("Add your todo : ");
+        String todo = scanner.nextLine();
+        
+        if(addTodoList(todo)) {
+            System.out.println("Todo has been added!");
+        }
+        
+    }
 
+    public static void viewRemoveTodoList() {
+        System.out.println("Tampilan Menu Hapus Tugas!");
     }
     /**
      * Helper :
     * 1. Fungsi garis sederhana dengan character
     * 2. Fungsi untuk mengecek jika todolist kosong/tidak
-    * 3. Fungsi untuk inputan berupa angka
-    * 4. Fungsi pengecekan index yang tersedia dari todolist
-    * 5. Fungsi untuk memperbesar ukuran todolist
+    * 3. Fungsi pengecekan index yang tersedia dari todolist
+    * 4. Fungsi untuk memperbesar ukuran todolist
+    * 5. Fungsi untuk keluar dari program
     */
 
     public static void delimiter(char c, int length) {
@@ -165,15 +206,6 @@ import java.util.Scanner;
     public static boolean isEmpty() {
         return todos[0] == null;
     }
-
-    public static int getInt(Scanner sc) {
-        while(!sc.hasNextInt()) {
-            System.out.println("Please insert a correct number!");
-            sc.nextLine();
-        }
-
-        return scanner.nextInt();
-    } 
 
     public static int indexAvailable() {
         int result = -1;
@@ -201,6 +233,10 @@ import java.util.Scanner;
         //     for(String todo : todos) {
         //     System.out.println(todo);
         // }
+    }
+
+    private static void exit() {
+        System.exit(0);
     }
  }
  
