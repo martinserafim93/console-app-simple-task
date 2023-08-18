@@ -13,10 +13,10 @@ import java.util.Scanner;
     private static Scanner scanner = new Scanner(System.in);
     private static String[] todos = new String[2];
     public static void main(String... args) {
-        testViewTodoList();
+        viewTodoList();
     }
 
-    // Controller (bussines logic)
+    // Model (business logic) ===============================================
     /**
      * TODO:
      * 1. Buat bisnis logic untuk menampilkan
@@ -26,22 +26,23 @@ import java.util.Scanner;
      * 3. Sedangkan jika terdapat daftar tugas
      *    maka tampilkan daftar tugas.
      */
-    public static void showTodoList() {
+    private static void showTodoList() {
+        // reset jika item di todos sudah habis bukan null
+        if(todos.length == 0) {
+            todos = new String[2];
+        }
+
         if(isEmpty()) {
             System.out.println("You haven't created a to-do list yet.");
         } else {
             for(int i = 0; i < todos.length; i++) {
-                if(todos[i] == null) {
-                    continue; // skip jika terdapat nilai null dalam array
-                }
-                
                 System.out.printf("%d. %s%n", (i + 1), todos[i]);
             }
         }
     }
 
     // test
-    public static void testShowTodoList() {
+    static void testShowTodoList() {
         showTodoList();
     }
 
@@ -57,28 +58,24 @@ import java.util.Scanner;
      * 4. Jika daftar tugas belum penuh maka
      *    lakukan penginputan tugas
      */
-    public static boolean addTodoList(String todo) {
+    private static boolean addTodoList(String todo) {
         int index = indexAvailable(); 
         if(index >= 0) {
             todos[index] = todo;    
         } else {
-            resize(); // tambah ukuran array jika kondisi diatas false
+            resize(); // tambah ukuran array jika array penuh
             index = indexAvailable();
             todos[index] = todo;    
         }
         return true;
     }
 
-    public static void testAddTodoList() {
+    static void testAddTodoList() {
         addTodoList("Makanan");
         addTodoList("Minum");
         addTodoList("Tidur");
         addTodoList("Olahraga");
-  
- 
-        for(String todo : todos) {
-            System.out.println(todo);
-        }
+        showTodoList();
     }
 
     /**
@@ -94,9 +91,9 @@ import java.util.Scanner;
      *    boolean untuk dapat diproses pada
      *    fungsi view
      */
-    public static boolean removeTodoList(int number) {
+    private static boolean removeTodoList(int number) {
         int index = number - 1; // penyesuaian dengan index element pada array
-        if(index >= todos.length || index < 0){
+        if(index >= todos.length || index < 0 || isNull(index)){
             return false;
         } 
 
@@ -108,19 +105,13 @@ import java.util.Scanner;
         return true;
     }
 
-    private static void testRemoveTodoList() {
+    static void testRemoveTodoList() {
         addTodoList("Belajar Java");
-        addTodoList("Belajar C#");
-        addTodoList("Belajar Go");
-
-        removeTodoList(4);
         removeTodoList(1);
-
-        for(String todo : todos) {
-            System.out.println(todo);
-        }
+        showTodoList();
     }
-    // VIEW
+
+    // VIEW ==============================================================
     /**
      * TODO:
      * 1. Buat sebuah tampilan awaasl untuk menu.
@@ -133,18 +124,18 @@ import java.util.Scanner;
         int menu = 0;
         while(menu != 3) {
             try {
-                delimiter('=', 22);
+                delimiter('=', 25);
                 System.out.println("~ My TodoList ~");
-                delimiter('=', 22);
+                delimiter('=', 25);
                 showTodoList();
-                delimiter('=', 22);
+                delimiter('=', 25);
                 System.out.println("Menu :");
                 System.out.println("1. Add to-do list.");
                 System.out.println("2. Remove to-do list.");
                 System.out.println("3. Exit.");
                 System.out.print("Select menu (eq. 1,2,3): ");
                 menu = scanner.nextInt();
-                scanner.nextLine();
+                scanner.nextLine(); // konsumsi sisa whitespace dari enter
 
                 switch(menu) {
                     case 1:
@@ -166,16 +157,15 @@ import java.util.Scanner;
         }
     }
 
-    // test 
-    public static void testViewTodoList() {
+    static void testViewTodoList() {
         viewTodoList();
     }
 
     public static void viewAddTodoList() {
-        delimiter('*', 22);
+        delimiter('*', 25);
         System.out.println("~ Menu Add Todo ~");
-        delimiter('*', 22);
-        System.out.print("Add your todo : ");
+        delimiter('*', 25);
+        System.out.print("Add your todo: ");
         String todo = scanner.nextLine();
         
         if(addTodoList(todo)) {
@@ -185,7 +175,19 @@ import java.util.Scanner;
     }
 
     public static void viewRemoveTodoList() {
-        System.out.println("Tampilan Menu Hapus Tugas!");
+        delimiter('*', 25);
+        System.out.println("~ Menu Remove Todo ~");
+        delimiter('*', 25);
+        System.out.print("Please select the one you want to delete: ");
+        int item = scanner.nextInt();
+        scanner.nextLine(); // konsumsi sisa whitespace dari enter
+
+        if(removeTodoList(item)) {
+            System.out.println("Todo with selection number has been deleted!");
+        } else {
+            System.out.println("Item does not exist with the number you entered!");
+            System.out.println("Please try again...");
+        }
     }
     /**
      * Helper :
@@ -194,20 +196,21 @@ import java.util.Scanner;
     * 3. Fungsi pengecekan index yang tersedia dari todolist
     * 4. Fungsi untuk memperbesar ukuran todolist
     * 5. Fungsi untuk keluar dari program
+    * 6. Fungsi untuk mengecek jika item isinya kosong
     */
 
-    public static void delimiter(char c, int length) {
+    private static void delimiter(char c, int length) {
         for(int i = 1; i <= length; i++) {
             System.out.print(c);
         }
         System.out.println();
     }
 
-    public static boolean isEmpty() {
+    private static boolean isEmpty() {
         return todos[0] == null;
     }
 
-    public static int indexAvailable() {
+    private static int indexAvailable() {
         int result = -1;
         for(int i = 0; i < todos.length; i++) {
             if(todos[i] == null) {
@@ -225,7 +228,7 @@ import java.util.Scanner;
     * cara membuat sebuah array lain sebagai
     * penampung sementara.
     */
-    public static void resize() {
+    private static void resize() {
         String[] temp = todos;
         todos = new String[todos.length + 1];
 
@@ -237,6 +240,10 @@ import java.util.Scanner;
 
     private static void exit() {
         System.exit(0);
+    }
+
+    private static boolean isNull(int index) {
+        return todos[index] == null;
     }
  }
  
